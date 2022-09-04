@@ -1,20 +1,80 @@
+import { useState } from 'react';
+import { Button, FlatList, StyleSheet, View } from 'react-native';
+import GoalItem from './components/GoalItem';
+import GoalInput from './components/GoalInput';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
 
 export default function App() {
+  const [courseGoals, setCourseGoals] = useState([]);
+  const [modalIsVisible, setModalIsVisible] = useState(false);
+
+  function startAddGoalHandler() {
+    setModalIsVisible(true);
+  }
+
+  function endGoalHandler() {
+    setModalIsVisible(false);
+  }
+
+  function addGoalHandler(enteredGoalText) {
+    if (enteredGoalText !== '') {
+      setCourseGoals((prev) => [
+        ...prev,
+        { text: enteredGoalText, id: Math.random().toString() },
+      ]);
+    }
+    setModalIsVisible(false);
+  }
+
+  function deleteGoalHandler(id) {
+    setCourseGoals((prev) => prev.filter((item) => item.id !== id));
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <>
+      <StatusBar style='light' />
+      <View style={styles.appContainer}>
+        <Button
+          title='Add New Goal'
+          color='purple'
+          onPress={startAddGoalHandler}
+        />
+        <GoalInput
+          addGoalHandler={addGoalHandler}
+          endGoalHandler={endGoalHandler}
+          modalIsVisible={modalIsVisible}
+        />
+        <View style={styles.goalsContainer}>
+          <FlatList
+            data={courseGoals}
+            renderItem={({ item }) => {
+              return (
+                <GoalItem
+                  itemId={item.id}
+                  deleteGoalHandler={deleteGoalHandler}
+                >
+                  {item.text}
+                </GoalItem>
+              );
+            }}
+            key={(item, index) => {
+              return item.id;
+            }}
+            alwaysBounceVertical={false}
+          ></FlatList>
+        </View>
+      </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  appContainer: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingTop: 50,
+    paddingHorizontal: 16,
+  },
+  goalsContainer: {
+    flex: 5,
   },
 });
